@@ -2,9 +2,12 @@
 
 import yt
 import yt_cli
+import numpy as np
 
 import typer
 from rich.console import Console
+from typing_extensions import Annotated
+from typing import List, Optional
 
 app = typer.Typer()
 console = Console()
@@ -54,6 +57,36 @@ def info(
         console.print()
         console.print("[bold]Derived Fields[/bold]:")
         console.print(ds.derived_field_list)
+
+
+@app.command()
+def stats(
+    filename: str,
+    fields: Annotated[
+        Optional[List[str]], typer.Argument(help="fields to get statistics for")
+    ] = None,
+    field_type: Optional[str] = "gas",
+):
+    """Get statistics about the dataset"""
+    if fields is None or len(fields) == 0:
+        fields = ["density", "temperature"]
+    ds = yt.load(filename)
+    dd = ds.all_data()
+    field_requests = [(field_type, field) for field in fields]
+    mi = np.atleast_1d(dd.min(field_requests))
+    ma = np.atleast_1d(dd.max(field_requests))
+    means_vol = np.atleast_1d(dd.mean(field_requests, weight="volume"))
+    means_mass = np.atleast_1d(dd.mean(field_requests, weight="mass"))
+    console.print(f"[bold]Statistics for {filename}[/bold]")
+    for min_val, max_val, mean_vol, mean_mass, field in zip(
+        mi, ma, means_vol, means_mass, fields
+    ):
+        console.print(f"[bold]{field_type}, {field}[/bold]:")
+        console.print(f"Min: {min_val}")
+        console.print(f"Max: {max_val}")
+        console.print(f"Mean (volume-weighted): {mean_vol}")
+        console.print(f"Mean (mass-weighted): {mean_mass}")
+        console.print()
 
 
 if __name__ == "__main__":
