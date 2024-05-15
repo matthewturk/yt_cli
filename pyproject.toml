@@ -29,6 +29,9 @@ dev = [
     "ruff"  # linting
 ]
 
+[project.scripts]
+ytc = "yt_cli.cli:app"
+
 [project.urls]
 
 bugs = "https://github.com/matthewturk/yt_cli/issues"
