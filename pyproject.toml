@@ -1,0 +1,63 @@
+[build-system]
+requires = ["setuptools>=61.0"]
+build-backend = "setuptools.build_meta"
+
+[project]
+name = "yt_cli"
+version = "0.1.0"
+description = "An extension to the yt CLI"
+readme = "README.rst"
+authors = [
+  {name = "Matthew Turk", email = "matthewturk@gmail.com"}
+]
+maintainers = [
+  {name = "Matthew Turk", email = "matthewturk@gmail.com"}
+]
+classifiers = [
+
+]
+license = {text = "MIT license"}
+dependencies = [
+  "typer"
+]
+
+[project.optional-dependencies]
+dev = [
+    "coverage",  # testing
+    "mypy",  # linting
+    "pytest",  # testing
+    "ruff"  # linting
+]
+
+[project.urls]
+
+bugs = "https://github.com/matthewturk/yt_cli/issues"
+changelog = "https://github.com/matthewturk/yt_cli/blob/master/changelog.md"
+homepage = "https://github.com/matthewturk/yt_cli"
+
+[tool.setuptools]
+package-dir = {"" = "src"}
+
+[tool.setuptools.package-data]
+"*" = ["*.*"]
+
+
+
+
+# Mypy
+# ----
+
+[tool.mypy]
+files = "."
+
+# Use strict defaults
+strict = true
+warn_unreachable = true
+warn_no_return = true
+
+[[tool.mypy.overrides]]
+# Don't require test functions to include types
+module = "tests.*"
+allow_untyped_defs = true
+disable_error_code = "attr-defined"
+
