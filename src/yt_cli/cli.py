@@ -7,7 +7,7 @@ import numpy as np
 import typer
 from rich.console import Console
 from typing_extensions import Annotated
-from typing import List, Optional
+from typing import List, Optional, Union
 
 app = typer.Typer()
 console = Console()
@@ -87,6 +87,96 @@ def stats(
         console.print(f"Mean (volume-weighted): {mean_vol}")
         console.print(f"Mean (mass-weighted): {mean_mass}")
         console.print()
+
+
+@app.command()
+def slice(
+    filename: str,
+    field: str,
+    field_type: Optional[str] = "gas",
+    width: Optional[float] = 1.0,
+    center: Optional[List[float]] = [0.5, 0.5, 0.5],
+    cmap: Optional[str] = "viridis",
+    output: Optional[str] = None,
+    axis: Optional[str] = "z",
+):
+    """Plot a slice of the dataset"""
+    ds = yt.load(filename)
+    slc = yt.SlicePlot(
+        ds, axis, (field_type, field), center=center, width=(width, "unitary")
+    )
+    slc.set_cmap(field, cmap)
+    slc.save(output)
+
+
+@app.command()
+def project(
+    filename: str,
+    field: str,
+    field_type: Optional[str] = "gas",
+    width: Optional[float] = 1.0,
+    center: Optional[List[float]] = [0.5, 0.5, 0.5],
+    cmap: Optional[str] = "viridis",
+    output: Optional[str] = None,
+    axis: Optional[str] = "z",
+    weight_field: Optional[str] = None,
+):
+    """Plot a projection of the dataset"""
+    ds = yt.load(filename)
+    prj = yt.ProjectionPlot(
+        ds,
+        axis,
+        (field_type, field),
+        weight_field=weight_field,
+        center=center,
+        width=(width, "unitary"),
+    )
+    prj.set_cmap(field, cmap)
+    prj.save(output)
+
+
+@app.command()
+def pdf(
+    filename: str,
+    field: str,
+    field_type: Optional[str] = "gas",
+    bins: Optional[int] = 64,
+    output: Optional[str] = None,
+):
+    """Plot a probability distribution function of the dataset"""
+    ds = yt.load(filename)
+    dd = ds.all_data()
+    field = (field_type, field)
+    y_field = (field_type, "cell_volume")
+    hist = yt.create_profile(dd, field, y_field, n_bins=bins, fractional=True)
+    hist.plot().save(output)
+
+
+@app.command()
+def profile(
+    filename: str,
+    x_field: str = "density",
+    field_type: Optional[str] = "gas",
+    weight_field: Optional[str] = None,
+    output: Optional[str] = None,
+    y_fields: Annotated[
+        Optional[List[str]], typer.Argument(help="fields to profile")
+    ] = None,
+):
+    """Plot a profile of the dataset"""
+    ds = yt.load(filename)
+    if y_fields is None or len(y_fields) == 0:
+        y_fields = ["volume"]
+    dd = ds.all_data()
+    x_field = (field_type, x_field)
+    y_fields = [(field_type, field) for field in y_fields]
+    prof = yt.ProfilePlot(
+        dd,
+        x_field,
+        y_fields,
+        weight_field=weight_field,
+    )
+    prof.save(output)
 
 
 if __name__ == "__main__":
