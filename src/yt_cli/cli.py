@@ -1,7 +1,7 @@
 """Console script for yt_cli."""
 
 import yt
-import yt_cli
+from .yt_cli import YTExplorerApp
 import numpy as np
 
 import typer
@@ -177,6 +177,14 @@ def profile(
         weight_field=weight_field,
     )
     prof.save(output)
+
+
+@app.command()
+def run(
+    path: Optional[str] = "./",
+):
+    """Run the yt explorer app"""
+    YTExplorerApp(path=path).run()
 
 
 if __name__ == "__main__":
