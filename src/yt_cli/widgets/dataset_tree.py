@@ -1,8 +1,5 @@
-from textual.widgets import DirectoryTree
+from textual.widgets import Tree
 
 
-class DatasetTree(DirectoryTree):
+class DatasetTree(Tree):
     pass
-    # def action_select(self, path):
-    #    print(f"Selected: {path}")
-    #    return True

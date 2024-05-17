@@ -11,7 +11,7 @@ authors = [{ name = "Matthew Turk", email = "matthewturk@gmail.com" }]
 maintainers = [{ name = "Matthew Turk", email = "matthewturk@gmail.com" }]
 classifiers = []
 license = { text = "MIT license" }
-dependencies = ["typer", "yt>=4.2.0", "textual"]
+dependencies = ["typer", "yt>=4.2.0", "textual", "textual-fspicker"]
 
 [project.optional-dependencies]
 dev = [
