@@ -3,34 +3,35 @@
 import sys
 from pathlib import Path
 from textual.app import App, ComposeResult
-from textual.containers import ScrollableContainer
-from textual.widgets import Header, Footer, Label, Pretty
+from textual.containers import ScrollableContainer, Horizontal
+from textual.widgets import Header, Footer, Label
 from textual.reactive import reactive
 from textual_fspicker import FileOpen, Filters
 import yt.utilities
-from .widgets import DatasetTree
+from .widgets import GridDisplayTree, GridInfoDisplay
 import yt
 from yt.data_objects.static_output import Dataset
+from .screens import StringLoader
 
 
 class YTExplorerApp(App):
     """An app to explore datasets with yt"""
 
-    BINDINGS = [("q", "quit"), ("o", "open_button")]
+    SCREENS = {"string_loader": StringLoader()}
+    BINDINGS = [("q", "quit"), ("o", "open_button"), ("ctrl+o", "string_loader")]
 
     dataset: reactive[Dataset | None] = reactive(None)
-
-    def __init__(self, path="./") -> None:
-        self.path = path
-        super().__init__()
 
     def compose(self) -> ComposeResult:
         """Compose the layout."""
         yield Header()
         yield Footer()
         yield Label(f"Opened file: {self.dataset or 'None'}")
-        yield ScrollableContainer(DatasetTree("hi"))
-        yield Pretty(getattr(self.dataset, "parameters", {}))
+        with Horizontal():
+            yield ScrollableContainer(
+                GridDisplayTree().data_bind(YTExplorerApp.dataset)
+            )
+            yield GridInfoDisplay()
 
     def action_open_button(self) -> None:
         """Open a dataset."""
@@ -50,7 +51,12 @@ class YTExplorerApp(App):
             callback=self.open_file,
         )
 
+    def action_string_loader(self) -> None:
+        self.push_screen("string_loader", callback=self.open_file)
+
     def open_file(self, to_show: Path | None) -> None:
+        if to_show is None:
+            return
         new_label = "Opened file"
         try:
             self.dataset = yt.load(to_show)

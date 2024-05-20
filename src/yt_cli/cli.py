@@ -184,7 +184,7 @@ def run(
     path: Optional[str] = "./",
 ):
     """Run the yt explorer app"""
-    YTExplorerApp(path=path).run()
+    YTExplorerApp().run()
 
 
 if __name__ == "__main__":
